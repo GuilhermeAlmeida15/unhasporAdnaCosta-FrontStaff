@@ -1,5 +1,138 @@
-:root {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+@import "tailwindcss";
+
+@theme {
+  /* Tipografia — Plus Jakarta Sans (Google Fonts, carregada no index.html) */
+  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system,
+    "Segoe UI", sans-serif;
+
+  --text-display: 32px;
+  --text-display--line-height: 38px;
+  --text-display--font-weight: 700;
+  --text-display--letter-spacing: -0.3px;
+
+  --text-h1: 24px;
+  --text-h1--line-height: 30px;
+  --text-h1--font-weight: 700;
+  --text-h1--letter-spacing: -0.2px;
+
+  --text-h2: 20px;
+  --text-h2--line-height: 26px;
+  --text-h2--font-weight: 600;
+
+  --text-h3: 17px;
+  --text-h3--line-height: 24px;
+  --text-h3--font-weight: 600;
+
+  --text-body-lg: 16px;
+  --text-body-lg--line-height: 24px;
+
+  --text-body: 15px;
+  --text-body--line-height: 22px;
+
+  --text-body-sm: 13px;
+  --text-body-sm--line-height: 18px;
+
+  --text-caption: 12px;
+  --text-caption--line-height: 16px;
+  --text-caption--font-weight: 500;
+
+  --text-label: 12px;
+  --text-label--line-height: 16px;
+  --text-label--font-weight: 700;
+  --text-label--letter-spacing: 0.4px;
+
+  --text-button: 15px;
+  --text-button--line-height: 20px;
+  --text-button--font-weight: 600;
+
+  --text-badge: 12px;
+  --text-badge--line-height: 16px;
+  --text-badge--font-weight: 600;
+
+  /* Cor */
+  --color-surface: #ffffff;
+  --color-surface-raised: #ffffff;
+  --color-surface-sunken: #faf5f7;
+  --color-border: #f0e1e8;
+  --color-border-strong: #e3c9d4;
+  --color-ink: #2b1e26;
+  --color-ink-muted: #6b5560;
+  --color-ink-subtle: #a6919b;
+  --color-ink-on-brand: #ffffff;
+  --color-brand: #be185d;
+  --color-brand-pressed: #9d1450;
+  --color-brand-soft: #fce4ef;
+  --color-brand-softer: #fef6fa;
+  --color-status-pendente: #b45309;
+  --color-status-pendente-soft: #fef3e2;
+  --color-status-confirmado: #047857;
+  --color-status-confirmado-soft: #e7f7ef;
+  --color-status-recusado: #b91c1c;
+  --color-status-recusado-soft: #fdecec;
+  --color-status-cancelado: #4b5563;
+  --color-status-cancelado-soft: #f1f2f4;
+  --color-overlay: rgba(43, 30, 38, 0.44);
+
+  /* Raio — escala por função, não por tamanho */
+  --radius-sm: 12px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --radius-pill: 999px;
+
+  /* Sombra — só em quem flutua sobre o conteúdo */
+  --shadow-sm: 0 1px 2px rgba(43, 30, 38, 0.05), 0 2px 10px rgba(43, 30, 38, 0.06);
+  --shadow-md: 0 8px 24px rgba(43, 30, 38, 0.12), 0 2px 6px rgba(43, 30, 38, 0.06);
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    margin: 0;
+    min-height: 100dvh;
+    background-color: var(--color-surface);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-size: var(--text-body);
+    line-height: var(--text-body--line-height);
+    -webkit-font-smoothing: antialiased;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Foco: anel sólido de brand, 2px, nunca só sombra */
+  :focus-visible {
+    outline: 2px solid var(--color-brand);
+    outline-offset: 2px;
+  }
+}
+
+/* Erro de código/credencial: o tremor é o que sinaliza "tente de novo" */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-4px); }
+  40% { transform: translateX(4px); }
+  60% { transform: translateX(-4px); }
+  80% { transform: translateX(4px); }
+}
+
+@utility animate-shake {
+  animation: shake 300ms ease-in-out;
+}
+
+@keyframes rise {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@utility animate-rise {
+  animation: rise 260ms cubic-bezier(0.32, 0.72, 0, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }
