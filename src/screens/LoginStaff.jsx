@@ -70,6 +70,18 @@ export default function LoginStaff({ onEntrar }) {
   // Muda a cada erro para o banner tremer de novo, mesmo com a mesma mensagem.
   const [tentativa, setTentativa] = useState(0)
 
+  // Digitar de novo apaga o aviso do envio anterior: o valor que está ali
+  // agora ainda não foi recusado por ninguém.
+  function mudar(definir, campo) {
+    return (evento) => {
+      definir(evento.target.value)
+      setErro(null)
+      setCampos((atuais) =>
+        atuais[campo] === undefined ? atuais : { ...atuais, [campo]: undefined }
+      )
+    }
+  }
+
   const podeEnviar = email.trim() !== '' && senha !== ''
 
   function falhar(mensagem, camposDaApi = {}) {
@@ -110,7 +122,10 @@ export default function LoginStaff({ onEntrar }) {
   }
 
   return (
-    <main className="mx-auto flex min-h-dvh w-full max-w-sm flex-col px-4 pt-14 pb-6">
+    // No celular a coluna ocupa a tela toda; a partir de `sm` vira um cartão
+    // centrado, para não ficar uma faixa estreita colada no topo do monitor.
+    <main className="flex min-h-dvh flex-col items-center px-4 pt-14 pb-6 sm:justify-center sm:py-10">
+      <div className="w-full max-w-sm sm:rounded-lg sm:border sm:border-border sm:bg-surface-raised sm:p-8 sm:shadow-sm">
       <header className="animate-rise">
         <div className="flex size-14 items-center justify-center rounded-md bg-brand-soft text-brand">
           <MarcaIcon />
@@ -152,7 +167,7 @@ export default function LoginStaff({ onEntrar }) {
           value={email}
           error={campos.email}
           disabled={enviando}
-          onChange={(e) => setEmail(e.target.value)}
+          onChange={mudar(setEmail, 'email')}
         />
 
         <Input
@@ -164,7 +179,7 @@ export default function LoginStaff({ onEntrar }) {
           value={senha}
           error={campos.senha}
           disabled={enviando}
-          onChange={(e) => setSenha(e.target.value)}
+          onChange={mudar(setSenha, 'senha')}
           trailing={
             <button
               type="button"
@@ -183,13 +198,14 @@ export default function LoginStaff({ onEntrar }) {
         </Button>
       </form>
 
-      <p className="mt-6 text-body-sm text-ink-muted">
-        Esqueceu a senha? Peça à supervisora uma senha temporária — você troca
-        por uma nova no primeiro acesso.
-      </p>
+        <p className="mt-6 text-body-sm text-ink-muted">
+          Esqueceu a senha? Peça à supervisora uma senha temporária — você troca
+          por uma nova no primeiro acesso.
+        </p>
+      </div>
 
-      <p className="mt-auto pt-10 text-caption text-ink-muted">
-        Administradora e Supervisora entram por aqui. Cliente agenda pelo app,
+      <p className="mt-auto w-full max-w-sm pt-10 text-caption text-ink-muted sm:mt-6 sm:pt-0 sm:text-center">
+        Administrador e Supervisora entram por aqui. Cliente agenda pelo app,
         com um código de 6 dígitos.
       </p>
     </main>
