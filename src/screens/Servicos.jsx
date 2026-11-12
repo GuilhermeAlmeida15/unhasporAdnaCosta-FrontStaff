@@ -1,23 +1,34 @@
 import { useEffect, useState } from 'react'
 import Button from '../components/Button'
 import Input from '../components/Input'
+import Select from '../components/Select'
 import Sheet from '../components/Sheet'
 import Textarea from '../components/Textarea'
 import {
   ApiError,
   atualizarServico,
   criarServico,
+  listarCategorias,
   listarServicos,
   removerServico,
 } from '../lib/api'
 import { duracao, preco } from '../lib/datas'
 import { useErrosDeCampo } from '../lib/erros'
 
-const VAZIO = { id: null, nome: '', preco: '', descricao: '', duracao_minutos: '60' }
+const VAZIO = {
+  id: null,
+  nome: '',
+  preco: '',
+  descricao: '',
+  duracao_minutos: '60',
+  categoria_id: '',
+}
 
 /** Só a Supervisora escreve em `/api/servicos`; a leitura é pública. */
 export default function Servicos({ onAviso }) {
   const [servicos, setServicos] = useState([])
+  // As categorias cadastradas na aba Categorias: são elas que o select oferece.
+  const [categorias, setCategorias] = useState([])
   const [carregando, setCarregando] = useState(true)
   const [erro, setErro] = useState(null)
   const [removendo, setRemovendo] = useState(null)
@@ -51,9 +62,11 @@ export default function Servicos({ onAviso }) {
 
     async function buscar() {
       try {
-        const dados = await listarServicos()
+        // As duas juntas: sem as categorias o formulário não teria o que oferecer.
+        const [dados, grupos] = await Promise.all([listarServicos(), listarCategorias()])
         if (ativo) {
           setServicos(dados?.servicos ?? [])
+          setCategorias(grupos?.categorias ?? [])
           setErro(null)
         }
       } catch (e) {
@@ -81,6 +94,7 @@ export default function Servicos({ onAviso }) {
             preco: String(servico.preco),
             descricao: servico.descricao ?? '',
             duracao_minutos: String(servico.duracao_minutos),
+            categoria_id: servico.categoria_id ?? '',
           }
         : { ...VAZIO }
     )
@@ -102,6 +116,10 @@ export default function Servicos({ onAviso }) {
       locais.preco = 'O preço não pode ser negativo.'
     }
 
+    if (edicao.categoria_id === '') {
+      locais.categoria_id = 'Escolha a categoria do serviço.'
+    }
+
     const minutos = Number(edicao.duracao_minutos)
     if (!Number.isInteger(minutos) || minutos < 15 || minutos > 480 || minutos % 5 !== 0) {
       locais.duracao_minutos =
@@ -120,6 +138,7 @@ export default function Servicos({ onAviso }) {
     const corpo = {
       nome: edicao.nome.trim(),
       preco: valor,
+      categoria_id: edicao.categoria_id,
       duracao_minutos: minutos,
       descricao: edicao.descricao.trim() === '' ? null : edicao.descricao.trim(),
     }
@@ -181,7 +200,7 @@ export default function Servicos({ onAviso }) {
       <h2 className="text-h2 text-ink">Serviços</h2>
       <p className="mt-2 max-w-prose text-body-sm text-ink-muted">
         O que o cliente vê ao escolher um horário. A duração define quanto tempo o
-        horário ocupa na agenda.
+        horário ocupa na agenda e a categoria é o grupo em que ele aparece.
       </p>
 
       {servicos.length === 0 ? (
@@ -205,6 +224,14 @@ export default function Servicos({ onAviso }) {
               <p className="mt-1 text-body-sm text-ink-muted">
                 {duracao(servico.duracao_minutos)}
               </p>
+
+              {servico.categoria ? (
+                <p className="mt-2">
+                  <span className="inline-flex rounded-pill bg-brand-soft px-3 py-1 text-badge text-brand">
+                    {servico.categoria}
+                  </span>
+                </p>
+              ) : null}
 
               {servico.descricao ? (
                 <p className="mt-2 text-body-sm text-ink-muted">{servico.descricao}</p>
@@ -233,9 +260,21 @@ export default function Servicos({ onAviso }) {
         </ul>
       )}
 
-      <Button full className="mt-6 md:w-auto" onClick={() => abrir(null)}>
+      <Button
+        full
+        className="mt-6 md:w-auto"
+        disabled={categorias.length === 0}
+        onClick={() => abrir(null)}
+      >
         Novo serviço
       </Button>
+
+      {categorias.length === 0 ? (
+        <p className="mt-3 text-body-sm text-ink-muted">
+          Cadastre uma categoria na aba Categorias antes de criar o primeiro serviço:
+          todo serviço entra em uma delas.
+        </p>
+      ) : null}
 
       <p className="mt-3 text-body-sm text-ink-muted">
         Remover só tira do catálogo: os agendamentos antigos continuam mostrando o
@@ -258,6 +297,15 @@ export default function Servicos({ onAviso }) {
             onChange={(e) => mudar('nome', e.target.value)}
           />
 
+          <Select
+            label="Categoria"
+            opcoes={categorias.map((c) => ({ valor: c.id, rotulo: c.nome }))}
+            value={edicao?.categoria_id ?? ''}
+            error={erros.categoria_id}
+            disabled={salvando}
+            onChange={(e) => mudar('categoria_id', e.target.value)}
+          />
+
           <Input
             label="Preço"
             inputMode="decimal"
@@ -277,7 +325,6 @@ export default function Servicos({ onAviso }) {
             step={5}
             value={edicao?.duracao_minutos ?? ''}
             error={erros.duracao_minutos}
-            hint="Entre 15 e 480, de 5 em 5."
             disabled={salvando}
             onChange={(e) => mudar('duracao_minutos', e.target.value)}
           />

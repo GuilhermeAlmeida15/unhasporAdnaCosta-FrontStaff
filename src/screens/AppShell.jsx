@@ -6,6 +6,7 @@ import Sheet from '../components/Sheet'
 import SideNav from '../components/SideNav'
 import Toast from '../components/Toast'
 import Agenda from './Agenda'
+import Categorias from './Categorias'
 import Equipe from './Equipe'
 import Expediente from './Expediente'
 import Servicos from './Servicos'
@@ -21,6 +22,12 @@ const ABAS = {
   },
   equipe: { id: 'equipe', rotulo: 'Equipe', icone: 'equipe', titulo: 'Equipe' },
   servicos: { id: 'servicos', rotulo: 'Serviços', icone: 'servicos', titulo: 'Serviços' },
+  categorias: {
+    id: 'categorias',
+    rotulo: 'Categorias',
+    icone: 'categorias',
+    titulo: 'Categorias',
+  },
 }
 
 function IconeConta() {
@@ -48,7 +55,7 @@ export default function AppShell({ usuario, onSair, onTrocarSenha }) {
     ABAS.agenda,
     ABAS.expediente,
     ...(podeGerenciarEquipe(usuario) ? [ABAS.equipe] : []),
-    ...(podeGerenciarServicos(usuario) ? [ABAS.servicos] : []),
+    ...(podeGerenciarServicos(usuario) ? [ABAS.servicos, ABAS.categorias] : []),
   ]
 
   const [atual, setAtual] = useState('agenda')
@@ -97,6 +104,7 @@ export default function AppShell({ usuario, onSair, onTrocarSenha }) {
           {atual === 'expediente' ? <Expediente onAviso={avisar} /> : null}
           {atual === 'equipe' ? <Equipe usuario={usuario} onAviso={avisar} /> : null}
           {atual === 'servicos' ? <Servicos onAviso={avisar} /> : null}
+          {atual === 'categorias' ? <Categorias onAviso={avisar} /> : null}
         </main>
       </div>
 

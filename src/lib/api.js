@@ -156,8 +156,8 @@ export function definirUsuarioAtivo(id, ativo) {
 
 // --- serviços (leitura pública, escrita só da Supervisora) ---
 
-export function listarServicos() {
-  return pedir('GET', '/servicos')
+export function listarServicos({ categoriaId } = {}) {
+  return pedir('GET', '/servicos', { query: { categoria_id: categoriaId } })
 }
 
 export function criarServico(servico) {
@@ -171,4 +171,25 @@ export function atualizarServico(id, servico) {
 /** Não apaga: desativa, para os agendamentos antigos seguirem apontando nele. */
 export function removerServico(id) {
   return pedir('DELETE', `/servicos/${id}`)
+}
+
+// --- categorias (leitura pública, escrita só da Supervisora) ---
+
+/** Cada categoria traz `servicos`: quantos serviços ativos estão nela. */
+export function listarCategorias() {
+  return pedir('GET', '/categorias')
+}
+
+export function criarCategoria(nome) {
+  return pedir('POST', '/categorias', { body: { nome } })
+}
+
+/** Renomear vale para todos os serviços da categoria de uma vez. */
+export function atualizarCategoria(id, nome) {
+  return pedir('PUT', `/categorias/${id}`, { body: { nome } })
+}
+
+/** 409 enquanto houver serviço ativo na categoria; o erro diz quantos. */
+export function removerCategoria(id) {
+  return pedir('DELETE', `/categorias/${id}`)
 }
