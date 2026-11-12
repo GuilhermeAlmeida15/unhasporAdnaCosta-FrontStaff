@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef,useState } from 'react'
+import useAtualizar from '../lib/useAtualizar'
 import AppointmentCard from '../components/AppointmentCard'
 import Button from '../components/Button'
 import EmptyState from '../components/EmptyState'
@@ -36,12 +37,27 @@ const VAZIOS = {
 }
 
 function Filtros({ atual, onTrocar, desabilitado }) {
+  const indice = Math.max(
+    FILTROS.findIndex((f) => f.id === atual),
+    0,
+  )
+
   return (
     <div
       role="tablist"
       aria-label="Filtrar por status"
-      className="flex max-w-sm gap-1 rounded-pill bg-surface-sunken p-1"
+      className="relative flex max-w-sm rounded-pill bg-surface-sunken p-1"
     >
+      {/* Pílula rosa que desliza entre os filtros */}
+      <span
+        aria-hidden="true"
+        className="absolute inset-y-1 left-1 rounded-pill bg-brand-soft transition-transform duration-300 ease-in-out"
+        style={{
+          width: `calc((100% - 0.5rem) / ${FILTROS.length})`,
+          transform: `translateX(${indice * 100}%)`,
+        }}
+      />
+
       {FILTROS.map((filtro) => {
         const ativo = filtro.id === atual
 
@@ -53,8 +69,8 @@ function Filtros({ atual, onTrocar, desabilitado }) {
             aria-selected={ativo}
             disabled={desabilitado}
             onClick={() => onTrocar(filtro.id)}
-            className={`flex-1 rounded-pill px-3 py-2 text-button transition-colors duration-200 ease-in-out ${
-              ativo ? 'bg-brand-soft text-brand' : 'text-ink-muted'
+            className={`relative z-10 flex-1 rounded-pill px-3 py-2 text-button transition-colors duration-300 ease-in-out ${
+              ativo ? 'text-brand' : 'text-ink-muted'
             }`}
           >
             {filtro.rotulo}
@@ -100,6 +116,12 @@ export default function Agenda({ onAviso }) {
   const [versao, setVersao] = useState(0)
   const recarregar = () => setVersao((n) => n + 1)
 
+  const filtroRef = useRef(filtro)
+
+  useEffect(() => {
+   filtroRef.current = filtro
+  }, [filtro])
+
   useEffect(() => {
     let ativo = true
 
@@ -124,6 +146,26 @@ export default function Agenda({ onAviso }) {
       ativo = false
     }
   }, [filtro, versao])
+
+  async function recarregarSilencioso() {
+    // Não mexe na lista enquanto a pessoa está no meio de uma ação.
+    if (carregando || emAcao !== null || pedido !== null) return
+
+    const filtroDaBusca = filtro
+
+    try {
+      const dados = await listarAgendamentos({ status: filtroDaBusca || undefined })
+      // Se ela trocou o filtro durante a busca, descarta o resultado.
+      if (filtroDaBusca !== filtroRef.current) return
+
+      setAgendamentos(dados?.agendamentos ?? [])
+      setErro(null)
+    } catch {
+      // Se falhar, mantém a lista que já está na tela, sem mostrar erro.
+    }
+  }
+
+  useAtualizar(recarregarSilencioso)
 
   async function confirmar(agendamento) {
     setEmAcao(agendamento.id)

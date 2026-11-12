@@ -38,7 +38,16 @@ export default function SideNav({ abas, atual, onTrocar }) {
         </div>
 
         <nav aria-label="Seções" className="mt-6">
-          <ul className="flex flex-col gap-1">
+          <ul className="relative flex flex-col gap-1">
+            {/* Fundo rosa que desliza entre os itens */}
+            <span
+              aria-hidden="true"
+              className="absolute left-0 top-0 h-11 w-full rounded-pill bg-brand-soft transition-transform duration-300 ease-in-out"
+              style={{
+                transform: `translateY(${Math.max(abas.findIndex((a) => a.id === atual), 0) * 3}rem)`,
+              }}
+            />
+
             {abas.map((aba) => {
               const ativo = aba.id === atual
 
@@ -48,10 +57,8 @@ export default function SideNav({ abas, atual, onTrocar }) {
                     type="button"
                     onClick={() => onTrocar(aba.id)}
                     aria-current={ativo ? 'page' : undefined}
-                    className={`flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-button transition-colors duration-200 ease-in-out ${
-                      ativo
-                        ? 'bg-brand-softer text-brand'
-                        : 'text-ink-muted hover:bg-surface hover:text-ink'
+                    className={`relative z-10 flex h-11 w-full items-center gap-3 rounded-md px-3 text-button outline-none transition-colors duration-300 ease-in-out ${
+                      ativo ? 'text-brand' : 'text-ink-muted hover:bg-surface hover:text-ink'
                     }`}
                   >
                     <Icone nome={aba.icone} ativo={ativo} />

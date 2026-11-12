@@ -5,8 +5,8 @@
 //   API `admin`      → "Supervisora": tudo do Administrador, mais a gestão
 //                      da equipe e do catálogo de serviços.
 const NOMES = {
-  supervisor: 'Administrador',
-  admin: 'Supervisora',
+  supervisor: 'Supervisor',
+  admin: 'Administrador',
   cliente: 'Cliente',
 }
 

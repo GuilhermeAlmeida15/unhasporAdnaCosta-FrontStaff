@@ -215,7 +215,7 @@ export default function Equipe({ usuario, onAviso }) {
           setErroGeral(null)
         }}
       >
-        Novo Administrador
+        Novo Supervisor
       </Button>
 
       <p className="mt-3 max-w-prose text-body-sm text-ink-muted">
