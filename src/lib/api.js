@@ -1,8 +1,21 @@
-// Backend: agendamentos-unhasporAdnaCosta-backend (PHP + PostgreSQL), em
-// http://localhost:8080. Em desenvolvimento o Vite faz proxy de `/api` para lá
-// (ver vite.config.js), então front e API ficam na mesma origem e o cookie de
-// sessão (`sessao`) vai e volta sozinho — por isso todo fetch leva credentials.
-const BASE_URL = import.meta.env.VITE_API_URL ?? '/api'
+// Backend: agendamentos-unhasporAdnaCosta-backend (PHP + PostgreSQL), publicado
+// em https://agendamentos-unhasporadnacosta-backend.onrender.com/api — é essa
+// base que entra aqui, porque cada função abaixo acrescenta a rota (`/servicos`,
+// `/categorias`, `/auth/me`...).
+//
+// Em desenvolvimento, VITE_API_URL=/api (veja .env.development.local) manda as
+// chamadas para o próprio Vite, que repassa para a API pelo lado do servidor:
+// front e API viram a mesma origem no navegador, então não há CORS e o cookie
+// de sessão (`sessao`) vai e volta sozinho. Com a URL fixa aqui, o navegador
+// faz a chamada direto e o CORS volta a valer — aí a origem do front precisa
+// estar em FRONTEND_URL no servidor.
+//
+// A barra do fim sai fora: cada função abaixo começa a rota com "/", e
+// ".../api/" + "/servicos" viraria ".../api//servicos" — caminho que o
+// roteador do backend não reconhece, devolvendo 404 "Rota não encontrada".
+const BASE_URL = (
+  import.meta.env.VITE_API_URL ?? 'https://agendamentos-unhasporadnacosta-backend.onrender.com/api'
+).replace(/\/+$/, '')
 
 /** O backend exige ao menos isto numa senha nova (AuthService::SENHA_MINIMA). */
 export const SENHA_MINIMA = 10
